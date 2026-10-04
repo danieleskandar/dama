@@ -5,7 +5,7 @@ Tested on an `RTX 2080 Ti GPU (11 GB VRAM)` with `Python 3.9`, `PyTorch 2.7.1`, 
 ## 0. Clone the repository
 
 ```bash
-git clone https://github.com/danieleskandar/DAMA-code.git DAMA
+git clone --single-branch https://github.com/danieleskandar/dama.git DAMA
 cd DAMA
 ```
 
