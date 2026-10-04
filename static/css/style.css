@@ -1,0 +1,1172 @@
+/* ------------------------------------------------------------------ tokens */
+
+/* DAMA palette: blue, green, and red, as on danieleskandar.github.io. */
+:root {
+  --bg: #ffffff;
+  --bg-tint: #f5f5f5;         /* abstract, BibTeX, footer */
+  --surface: #ffffff;
+  --border: #e3e6ea;
+  --text: #2b2e33;
+  --heading: #16191d;
+  --text-muted: #5d6670;
+  --blue: #2554c4;
+  --green: #1f8a5b;
+  --red: #b42a3a;
+  --accent: var(--blue);
+  --accent-soft: rgba(37, 84, 196, 0.08);
+  --accent-2: var(--red);
+  /* One colour per letter of DAMA, left to right: blue, teal, green, red.
+     The acronym letters of the subtitle use the same colours. */
+  --dama-d: var(--blue);
+  --dama-a1: color-mix(in srgb, var(--blue) 50%, var(--green));
+  --dama-m: var(--green);
+  --dama-a2: var(--red);
+  --gradient: linear-gradient(90deg, var(--dama-d) 12%, var(--dama-a1) 37%, var(--dama-m) 63%, var(--dama-a2) 88%);
+  --shadow: 0 1px 2px rgba(16, 24, 40, 0.05), 0 6px 20px rgba(16, 24, 40, 0.07);
+  --radius: 10px;
+  --radius-sm: 8px;
+  --narrow: 1000px;
+  --wide: 1000px;
+  --content: 1000px;        /* one width for every block, as Bulma's is-max-desktop */
+  --gutter: clamp(16px, 4vw, 32px);
+  color-scheme: only light;
+}
+
+/* ------------------------------------------------------------------ base */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 17.5px;
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
+  font-size: 1.02rem;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  color: var(--heading);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+h2 {
+  font-size: clamp(1.6rem, 3vw, 1.9rem);
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+#abstract h2 {
+  text-align: center;
+}
+
+h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+p {
+  margin: 0 0 1rem;
+}
+
+/* No lone word on the last line of a paragraph or caption. */
+p,
+figcaption,
+dd,
+.card p {
+  text-wrap: pretty;
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+img,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+img {
+  height: auto;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.icon-fill {
+  fill: currentColor !important;
+  stroke: none !important;
+}
+
+.icon {
+  width: 1.1em;
+  height: 1.1em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: none;
+}
+
+/* ------------------------------------------------------------------ layout */
+
+.narrow,
+.wide {
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.narrow {
+  max-width: calc(var(--narrow) + 2 * var(--gutter));
+}
+
+.wide {
+  max-width: calc(var(--content) + 2 * var(--gutter));
+}
+
+.section {
+  padding-top: clamp(40px, 5vw, 64px);
+  padding-bottom: clamp(32px, 4vw, 48px);
+  scroll-margin-top: 60px;
+}
+
+.subsection {
+  margin-top: clamp(48px, 6vw, 72px);
+  scroll-margin-top: 72px;
+}
+
+.section-tinted {
+  background: var(--bg-tint);
+}
+
+.eyebrow {
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 0.6rem;
+}
+
+.section .narrow > p:not(.eyebrow) {
+  color: var(--text);
+}
+
+/* Section intros: main.js narrows each column to its fitted paragraph width. */
+.narrow.prose {
+  max-width: calc(var(--content) + 2 * var(--gutter));
+}
+
+.narrow.prose > p:not(.eyebrow) {
+  text-align: justify;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+}
+
+.section .narrow + .wide {
+  margin-top: 2.25rem;
+}
+
+h3.sub {
+  margin: 2.5rem 0 1rem;
+}
+
+h3.sub:first-child {
+  margin-top: 0;
+}
+
+/* ------------------------------------------------------------------ navbar */
+
+.navbar {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 100;
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter: saturate(180%) blur(14px);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%);
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.navbar.visible {
+  transform: none;
+}
+
+.navbar-inner {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  max-width: calc(var(--content) + 2 * var(--gutter));
+  height: 60px;
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.navbar-brand {
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  flex: none;
+}
+
+.navbar-brand:hover {
+  text-decoration: none;
+}
+
+.navbar-links {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.navbar-links::-webkit-scrollbar {
+  display: none;
+}
+
+.navbar-links a {
+  position: relative;
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-weight: 500;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: color 0.2s, background 0.2s;
+}
+
+.navbar-links a:hover {
+  color: var(--text);
+  background: var(--bg-tint);
+}
+
+.navbar-links a.active {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.navbar-links a.active::after {
+  content: "";
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: -11px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+
+.navbar-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+}
+
+.navbar-progress span {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--gradient);
+  opacity: 0.7;
+}
+
+@media (max-width: 760px) {
+  .navbar-inner {
+    gap: 12px;
+    height: 52px;
+  }
+
+  .navbar-links a.active::after {
+    bottom: -7px;
+  }
+}
+
+/* ------------------------------------------------------------------ buttons */
+
+.button,
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.2s;
+}
+
+.button {
+  padding: 0.75em 1.2em;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: var(--text);
+  color: var(--bg);
+}
+
+.button:hover {
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+
+.button[aria-disabled="true"] {
+  background: var(--bg-tint);
+  color: var(--text-muted);
+  border-color: var(--border);
+  cursor: default;
+  transform: none;
+}
+
+.button.small {
+  padding: 0.55em 0.95em;
+  font-size: 0.85rem;
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+.button.small:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.button.icon-only {
+  padding: 0.6em;
+}
+
+.soon {
+  font-size: 0.7em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.25em 0.5em;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.pill {
+  padding: 0.7em 1.25em;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.95rem;
+  font-weight: 500;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
+}
+
+.pill .icon {
+  width: 1.15em;
+  height: 1.15em;
+  color: var(--accent);
+}
+
+.pill:hover {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  box-shadow: 0 4px 14px rgba(16, 24, 40, 0.08);
+  transform: translateY(-1px);
+  text-decoration: none;
+}
+
+.pill.icon-only {
+  padding: 0.7em;
+}
+
+/* ------------------------------------------------------------------ hero */
+
+.hero {
+  max-width: calc(980px + 2 * var(--gutter));
+  margin-inline: auto;
+  padding: 72px var(--gutter) 40px;
+  text-align: center;
+}
+
+.hero-top {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 48px;
+}
+
+.title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35em;
+  margin-bottom: 28px;
+}
+
+.title-name {
+  font-size: clamp(3.2rem, 9vw, 5.6rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  padding-bottom: 0.05em;       /* keeps descenders inside the clipped gradient */
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.gradient-text {
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.title-sub {
+  font-size: clamp(1.3rem, 3vw, 2rem);
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+/* The letters that spell DAMA, in the colour of the same letter in the title. */
+.acr {
+  font-weight: 800;
+}
+
+.acr-d { color: var(--dama-d); }
+.acr-a1 { color: var(--dama-a1); }
+.acr-m { color: var(--dama-m); }
+.acr-a2 { color: var(--dama-a2); }
+
+.authors {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.3em 1.4em;
+  font-size: 1.12rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.author {
+  white-space: nowrap;
+}
+
+.authors a {
+  color: var(--text);
+  white-space: nowrap;
+  border-bottom: 1px solid var(--border);
+}
+
+.authors a:hover {
+  text-decoration: none;
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.authors sup,
+.affiliations sup {
+  color: var(--text-muted);
+  font-size: 0.65em;
+  margin-left: 1px;
+}
+
+.affiliations {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.2em 1.2em;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 0.25rem;
+}
+
+.note {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 0.6rem;
+  padding: 0.3em 0.85em;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--text);
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+
+.note-star {
+  color: var(--accent);
+  font-weight: 800;
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin: 28px 0 36px;
+}
+
+.tldr {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 16px 28px;
+  border-radius: var(--radius);
+  background: var(--accent-soft);
+  font-size: 1.05rem;
+  text-align: center;
+  text-wrap: balance;   /* even line lengths, no dangling words */
+}
+
+.tldr-label {
+  font-weight: 800;
+  color: var(--accent);
+  margin-right: 0.4em;
+}
+
+/* dropdown */
+
+.dropdown {
+  position: relative;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translate(-50%, -4px);
+  min-width: 260px;
+  width: max-content;
+  max-width: calc(100vw - 32px);
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  text-align: left;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s, transform 0.15s, visibility 0.15s;
+  z-index: 60;
+}
+
+.dropdown.open .dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+}
+
+.dropdown-menu a {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 12px;
+  border-radius: 6px;
+  color: var(--text);
+}
+
+.dropdown-menu a:hover {
+  background: var(--accent-soft);
+  text-decoration: none;
+}
+
+.dropdown-menu span {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ------------------------------------------------------------------ teaser + stats */
+
+.teaser {
+  padding-bottom: clamp(36px, 5vw, 56px);
+}
+
+.media {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: var(--bg-tint);
+}
+
+.media video,
+.media img {
+  width: 100%;
+  height: auto;
+}
+
+.teaser-media {
+  box-shadow: var(--shadow);
+  aspect-ratio: 16 / 9;
+}
+
+.teaser-media video {
+  height: 100%;
+  object-fit: cover;
+}
+
+figcaption {
+  color: var(--text-muted);
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-top: 0.9rem;
+  text-align: center;
+}
+
+figure {
+  margin: 0;
+}
+
+.stats {
+  max-width: calc(var(--content) + 2 * var(--gutter));
+  margin: 44px auto 0;
+  padding-inline: var(--gutter);
+  display: flex;
+}
+
+/* Columns take their content width plus an equal share of the rest, so no
+   label wraps on wide screens. */
+.stats div {
+  position: relative;
+  flex: 1 1 auto;
+  padding: 8px 18px;
+  text-align: center;
+}
+
+.stats div + div::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 18%;
+  bottom: 18%;
+  width: 1px;
+  background: var(--border);
+}
+
+.stats dt {
+  font-size: clamp(1.7rem, 2.8vw, 2.35rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.stats dt small {
+  font-size: 0.55em;
+  font-weight: 700;
+  margin-left: 0.12em;
+  color: var(--accent);
+}
+
+.stats dd {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+.stats dd::before {
+  content: "";
+  display: block;
+  width: 22px;
+  height: 3px;
+  margin: 0 auto 8px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+}
+
+@media (max-width: 980px) {
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    row-gap: 28px;
+  }
+
+  .stats div:nth-child(4)::before {
+    display: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stats dd {
+    white-space: normal;
+  }
+
+  .stats div:nth-child(odd)::before {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------------------------ figures */
+
+.figure {
+  margin-top: 56px;
+  border-radius: var(--radius);
+  background: #fff;             /* paper figures are drawn on white */
+}
+
+.figure img {
+  width: 100%;
+}
+
+/* Figures without a caption: a thin frame, so the figure gets the full width. */
+.figure-tight {
+  margin-top: 0;
+}
+
+/* Subsection titles inside a section intro. */
+.prose h3.sub {
+  margin: 0.25rem 0 0.75rem;
+  font-size: 1.3rem;
+}
+
+.wide h3.sub {
+  scroll-margin-top: 80px;
+  margin: 48px 0 14px;
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.figure figcaption {
+  max-width: 900px;
+  margin: 0.75rem auto 0;
+  padding-bottom: 0.25rem;
+  color: #3d454e;
+  font-size: 0.98rem;
+}
+
+
+/* ------------------------------------------------------------------ carousel */
+
+.carousel-stage {
+  position: relative;
+}
+
+/* Arrows beside the video; inside its edges when the screen has no room. */
+.carousel-stage .arrow {
+  position: absolute;
+  top: var(--arrow-top, 50%);
+  transform: translateY(-50%);
+  z-index: 2;
+}
+
+.carousel-stage .arrow.prev {
+  left: -64px;
+}
+
+.carousel-stage .arrow.next {
+  right: -64px;
+}
+
+@media (max-width: 1240px) {
+  .carousel-stage .arrow.prev {
+    left: 8px;
+  }
+
+  .carousel-stage .arrow.next {
+    right: 8px;
+  }
+
+  .carousel-stage .arrow {
+    background: color-mix(in srgb, var(--surface) 85%, transparent);
+    backdrop-filter: blur(6px);
+  }
+}
+
+.carousel {
+  position: relative;
+}
+
+.carousel-track {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  border-radius: var(--radius);
+}
+
+.carousel-track::-webkit-scrollbar {
+  display: none;
+}
+
+.slide {
+  flex: 0 0 100%;
+  scroll-snap-align: center;
+  display: flex;
+  justify-content: center;
+  margin: 0;
+}
+
+/* Every slide stretches to the tallest one; the caption box absorbs the
+   difference, so all caption boxes share one height. */
+.slide-body {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-heads {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 12px;
+  min-height: 3.2em;          /* two caption lines: every video starts at one height */
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.panel-head .tag {
+  margin-bottom: 0;
+}
+
+.panel-caption {
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: var(--text);
+  text-wrap: balance;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.slide .media {
+  background: #fff;
+}
+
+.slide .media video {
+  height: 100%;
+  object-fit: cover;
+}
+
+.slide-body > .media.unframed::after {
+  display: none;
+}
+
+.slide-body > .media::after {
+  /* frames the composed panel on the right, as in the main-idea diagram */
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: var(--last-panel, 25%);
+  border: 2px solid var(--role-purple);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  box-shadow: inset 0 0 0 4px color-mix(in srgb, var(--role-purple) 10%, transparent);
+  pointer-events: none;
+}
+
+.slide-caption {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 14px 0 0;
+  padding: 14px 24px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  text-align: center;
+  font-size: 1.08rem;
+  font-weight: 500;
+  line-height: 1.55;
+  color: var(--text);
+}
+
+.carousel-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.carousel-stage .arrow,
+.carousel-nav .arrow {
+  display: inline-grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.carousel-stage .arrow:hover,
+.carousel-nav .arrow:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.dots {
+  display: flex;
+  gap: 6px;
+}
+
+.dots button {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--border);
+  cursor: pointer;
+  transition: width 0.25s, background 0.25s;
+}
+
+.dots button[aria-current="true"] {
+  width: 22px;
+  background: var(--accent);
+}
+
+/* ------------------------------------------------------------------ dama */
+
+/* Venue line under the title. */
+.venue {
+  margin: 0 0 22px;
+  font-size: 1.3rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text-muted);
+}
+
+.venue a {
+  color: inherit;
+}
+
+.venue a:hover {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.venue .oral {
+  margin-left: 0.3em;
+  color: var(--red);
+  font-weight: 700;
+}
+
+/* Section intro text inside a section, after an h3. */
+.section .wide > p,
+.section .wide > .lead {
+  color: var(--text);
+  text-align: justify;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  margin: 0 0 1.25rem;
+}
+
+.wide h4.sub {
+  margin: 32px 0 10px;
+  font-size: 1.18rem;
+  font-weight: 600;
+}
+
+.figure-narrow {
+  max-width: 460px;
+  margin-inline: auto;
+}
+
+.figure + h3.sub,
+.video-block + h3.sub,
+.carousel + h3.sub {
+  margin-top: 48px;
+}
+
+/* A single video outside a carousel. */
+.video-block {
+  margin: 0 0 18px;
+  background: #fff;
+}
+
+.video-block video,
+.slide .media video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Single-video slides. */
+.slide > .media {
+  width: 100%;
+  background: #fff;
+}
+
+/* Funding logos. */
+.logos {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  margin-top: 2rem;
+}
+
+.logo-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 1.75rem;
+}
+
+.logo-row img {
+  width: auto;
+  object-fit: contain;
+}
+
+@media (max-width: 768px) {
+  .logo-row img {
+    height: 30px !important;
+  }
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.footer-links a {
+  color: var(--text-muted);
+}
+
+.footer-links a:hover {
+  color: var(--accent);
+}
+
+.footer-links .icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.bib-type { color: var(--blue); font-weight: 700; }
+.bib-key { color: var(--red); }
+.bib-field { color: var(--green); }
+
+/* ------------------------------------------------------------------ bibtex */
+
+.code-block {
+  position: relative;
+  border-radius: var(--radius);
+  background: var(--bg-tint);
+}
+
+.code-block pre {
+  margin: 0;
+  padding: 22px;
+  overflow-x: auto;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.code-block .copy {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+}
+
+.code-block .copy.done {
+  border-color: #2f9e6e;
+  color: #2f9e6e;
+}
+
+/* ------------------------------------------------------------------ footer */
+
+.footer {
+  padding: 40px var(--gutter) 56px;
+  background: var(--bg-tint);
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.footer p {
+  margin: 0;
+}
+
+/* ------------------------------------------------------------------ motion */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.reveal.in {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}

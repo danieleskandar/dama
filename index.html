@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>DAMA: Disentangled Body-Anchored Gaussians for Controllable Multi-Layered Avatars</title>
+    <meta name="description" content="Project page for DAMA, accepted as an oral at PhysHuman @ CVPR 2026.">
+    <link rel="canonical" href="https://danieleskandar.github.io/dama/">
+    <meta name="keywords" content="DAMA, Gaussian Splatting, Avatars, SMPL-X, Human Reconstruction, Clothing">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="color-scheme" content="only light">
+
+    <link rel="icon" href="./static/images/favicon.svg" type="image/svg+xml">
+    <link rel="preload" as="image" href="./static/images/teaser.webp" fetchpriority="high">
+    <link rel="stylesheet" href="./static/css/style.css">
+
+    <script defer src="./static/js/main.js"></script>
+</head>
+
+<body>
+    <!-- Top navigation: slides in once the title has scrolled out of view. -->
+    <nav class="navbar" aria-label="Sections">
+        <div class="navbar-inner">
+            <a class="navbar-brand" href="#top">DAMA</a>
+            <div class="navbar-links">
+                <a href="#abstract">Abstract</a>
+                <a href="#results">Results</a>
+                <a href="#main-idea">Main Idea</a>
+                <a href="#method">Method Visualization</a>
+                <a href="#comparisons">Comparisons</a>
+                <a href="#applications">Applications</a>
+                <a href="#bibtex">BibTeX</a>
+            </div>
+        </div>
+        <div class="navbar-progress" aria-hidden="true"><span id="progress-bar"></span></div>
+    </nav>
+
+    <header class="hero" id="top">
+        <div class="hero-top">
+            <a class="pill" href="https://danieleskandar.github.io/">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5M5.5 9.5V20h13V9.5" /></svg>
+                Home
+            </a>
+            <div class="dropdown" id="more-research">
+                <button class="pill" aria-expanded="false">
+                    <svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H10l2 2h6.5A1.5 1.5 0 0 1 20 7.5v11a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5Z" /></svg>
+                    More Research
+                    <svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></svg>
+                </button>
+                <div class="dropdown-menu">
+                    <a href="https://ptrvilya.github.io/cosmi/" target="_blank" rel="noopener">
+                        <strong>COSMI</strong>
+                        <span>Compositional synthesis of multi-object interactions · Preprint</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <h1 class="title">
+            <span class="title-name">DAMA</span>
+            <span class="title-sub"><b class="acr acr-d">D</b>isentangled Body-<b class="acr acr-a1">A</b>nchored Gaussians <br> for Controllable <b class="acr acr-m">M</b>ulti-Layered <b class="acr acr-a2">A</b>vatars</span>
+        </h1>
+
+        <p class="venue">
+            <a href="https://physhuman.github.io/" target="_blank" rel="noopener">PhysHuman Workshop @ CVPR 2026</a>
+            <span class="oral">(Oral)</span>
+        </p>
+
+        <p class="authors">
+            <span class="author"><a href="https://danieleskandar.github.io/" target="_blank" rel="noopener">Daniel Eskandar</a><sup>1,2,5</sup>,</span>
+            <span class="author"><a href="https://bernakabadayi.github.io/" target="_blank" rel="noopener">Berna Kabadayi</a><sup>1,3</sup>,</span>
+            <span class="author"><a href="https://garvita-tiwari.github.io/" target="_blank" rel="noopener">Garvita Tiwari</a><sup>1,2,4</sup>,</span>
+            <span class="author"><a href="https://virtualhumans.mpi-inf.mpg.de/people/pons-moll.html" target="_blank" rel="noopener">Gerard Pons-Moll</a><sup>1,2,4</sup></span>
+        </p>
+        <p class="affiliations">
+            <span><sup>1</sup>University of Tübingen,</span>
+            <span><sup>2</sup>Tübingen AI Center,</span>
+            <span><sup>3</sup>Max Planck Institute for Intelligent Systems,</span>
+            <span><sup>4</sup>Max Planck Institute for Informatics,</span>
+            <span><sup>5</sup>Zuse School ELIZA</span>
+        </p>
+
+        <div class="links">
+            <a class="button" href="https://arxiv.org/pdf/2605.21001" target="_blank" rel="noopener">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M14 3H6v18h12V7l-4-4Zm0 0v4h4M9 13h6M9 17h6" /></svg>
+                Paper
+            </a>
+            <a class="button" href="https://arxiv.org/abs/2605.21001" target="_blank" rel="noopener">
+                <svg class="icon icon-fill" viewBox="0 0 24 24"><path d="M3.8423 0a1.0037 1.0037 0 0 0-.922.6078c-.1536.3687-.0438.6275.2938 1.1113l6.9185 8.3597-1.0223 1.1058a1.0393 1.0393 0 0 0 .003 1.4229l1.2292 1.3135-5.4391 6.4444c-.2803.299-.4538.823-.2971 1.1986a1.0253 1.0253 0 0 0 .9585.635.9133.9133 0 0 0 .6891-.3405l5.783-6.126 7.4902 8.0051a.8527.8527 0 0 0 .6835.2597.9575.9575 0 0 0 .8777-.6138c.1577-.377-.017-.7502-.306-1.1407l-7.0518-8.3418 1.0632-1.13a.9626.9626 0 0 0 .0089-1.3165L4.6336.4639s-.3733-.4535-.768-.463zm0 .272h.0166c.2179.0052.4874.2715.5644.3639l.005.006.0052.0055 10.169 10.9905a.6915.6915 0 0 1-.0072.945l-1.0666 1.133-1.4982-1.7724-8.5994-10.39c-.3286-.472-.352-.6183-.2592-.841a.7307.7307 0 0 1 .6704-.4401Zm14.341 1.5701a.877.877 0 0 0-.6554.2418l-5.6962 6.1584 1.6944 1.8319 5.3089-6.5138c.3251-.4335.479-.6603.3247-1.0292a1.1205 1.1205 0 0 0-.9763-.689zm-7.6557 12.2823 1.3186 1.4135-5.7864 6.1295a.6494.6494 0 0 1-.4959.26.7516.7516 0 0 1-.706-.4669c-.1119-.2682.0359-.6864.2442-.9083l.0051-.0055.0047-.0055z"/></svg>
+                arXiv
+            </a>
+            <a class="button" href="https://github.com/danieleskandar/dama" target="_blank" rel="noopener">
+                <svg class="icon icon-fill" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                Code
+            </a>
+            <a class="button" href="./static/files/DAMA_CVPR2026_PhysHuman.pptx" download id="slides-button">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 19h16" /></svg>
+                <span class="button-text">Slides</span>
+            </a>
+            <a class="button" href="#bibtex">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M7 7h4v4c0 3-2 5-4 6m8-10h4v4c0 3-2 5-4 6" /></svg>
+                BibTeX
+            </a>
+        </div>
+    </header>
+
+    <section class="teaser" aria-label="Teaser">
+        <figure class="wide">
+            <div class="figure figure-tight">
+                <img width="2400" height="652" decoding="async" fetchpriority="high" src="./static/images/teaser.webp" alt="DAMA teaser">
+            </div>
+            <figcaption>
+                <b>DAMA.</b> (a) Reconstructs clean, intersection-free layers from multi-view images.
+                (b) Enables garment composition, stacking, and reordering.
+                (c) Produces animatable avatars and simulation-ready meshes.
+            </figcaption>
+        </figure>
+    </section>
+
+    <main>
+        <section id="abstract" class="section section-tinted">
+            <div class="narrow prose">
+                <h2>Abstract</h2>
+                <p>
+                    Existing 3D clothed avatar reconstruction methods achieve high visual fidelity but ignore geometric
+                    structure and physical plausibility. They either model clothed humans as a single deformable surface
+                    or attempt garment disentanglement without enforcing geometric constraints, resulting in ambiguous
+                    garment boundaries and no control over stacking or layer ordering.
+                </p>
+                <p>
+                    To address these limitations, we introduce DAMA (<b>D</b>isentangled body-<b>A</b>nchored Gaussians
+                    for Controllable <b>M</b>ulti-layered <b>A</b>vatars), a 3D avatar reconstruction method that
+                    produces physically plausible clothed avatars through a dedicated representation and reconstruction
+                    method.
+                </p>
+                <p>
+                    At the representation level, we bind Gaussians to SMPL-X faces using barycentric in-plane
+                    coordinates and a positive normal offset. Based on this parameterization, the reconstruction method
+                    lifts 2D segmentations to body-anchored Gaussians, refines layers using topology-guided correction,
+                    and jointly optimizes geometry and appearance.
+                </p>
+                <p>
+                    DAMA is the first Gaussian avatar reconstruction method from multi-view images to achieve physically
+                    plausible layering, clean garment separation, and explicit stacking control. On the full 4D-DRESS
+                    dataset (82 scans), it achieves state-of-the-art performance in geometry reconstruction, garment
+                    separation, penetration rate, and penetration depth. The representation further supports
+                    user-defined garment reordering and fast conversion of body-conforming garments to simulation-ready
+                    meshes.
+                </p>
+            </div>
+        </section>
+
+        <section id="results" class="section">
+            <div class="narrow prose">
+                <h2>Reconstruction Results</h2>
+                <p>
+                    DAMA reconstructs disentangled multi-layered avatars. Garments are reconstructed as separate layers
+                    with accurate boundaries. The body includes reconstructed visible skin and hair, while occluded
+                    regions are completed using the registered SMPL-X body.
+                </p>
+            </div>
+            <div class="wide">
+                <h3 class="sub">Outfits with an Inner Garment Only</h3>
+                <div class="carousel" data-carousel>
+                    <figure class="slide"><div class="media" style="aspect-ratio: 1920 / 388"><video controls data-src="./static/videos/reconstruction/00152_Inner_compressed.mp4" data-poster="./static/videos/reconstruction/00152_Inner_compressed.webp"></video></div></figure>
+                    <figure class="slide"><div class="media" style="aspect-ratio: 1920 / 388"><video controls data-src="./static/videos/reconstruction/00135_Inner_compressed.mp4" data-poster="./static/videos/reconstruction/00135_Inner_compressed.webp"></video></div></figure>
+                    <figure class="slide"><div class="media" style="aspect-ratio: 1920 / 388"><video controls data-src="./static/videos/reconstruction/00140_Inner_2_compressed.mp4" data-poster="./static/videos/reconstruction/00140_Inner_2_compressed.webp"></video></div></figure>
+                    <figure class="slide"><div class="media" style="aspect-ratio: 1920 / 388"><video controls data-src="./static/videos/reconstruction/00170_Inner_2_compressed.mp4" data-poster="./static/videos/reconstruction/00170_Inner_2_compressed.webp"></video></div></figure>
+                    <figure class="slide"><div class="media" style="aspect-ratio: 1920 / 388"><video controls data-src="./static/videos/reconstruction/00174_Inner_compressed.mp4" data-poster="./static/videos/reconstruction/00174_Inner_compressed.webp"></video></div></figure>
+                    <figure class="slide"><div class="media" style="aspect-ratio: 1920 / 388"><video controls data-src="./static/videos/reconstruction/00175_Inner_1_compressed.mp4" data-poster="./static/videos/reconstruction/00175_Inner_1_compressed.webp"></video></div></figure>
+                    <figure class="slide"><div class="media" style="aspect-ratio: 1920 / 388"><video controls data-src="./static/videos/reconstruction/00180_Inner_compressed.mp4" data-poster="./static/videos/reconstruction/00180_Inner_compressed.webp"></video></div></figure>
+                    <figure class="slide"><div class="media" style="aspect-ratio: 1920 / 388"><video controls data-src="./static/videos/reconstruction/00190_Inner_compressed.mp4" data-poster="./static/videos/reconstruction/00190_Inner_compressed.webp"></video></div></figure>
+                </div>
+
+                <h3 class="sub">Outfits with an Outer Garment</h3>
+                <div class="carousel" data-carousel>
+                    <figure class="slide"><div class="media" style="aspect-ratio: 1920 / 388"><video controls data-src="./static/videos/reconstruction/00122_Outer_compressed.mp4" data-poster="./static/videos/reconstruction/00122_Outer_compressed.webp"></video></div></figure>
+                    <figure class="slide"><div class="media" style="aspect-ratio: 1920 / 388"><video controls data-src="./static/videos/reconstruction/00136_Outer_1_compressed.mp4" data-poster="./static/videos/reconstruction/00136_Outer_1_compressed.webp"></video></div></figure>
+                    <figure class="slide"><div class="media" style="aspect-ratio: 1920 / 388"><video controls data-src="./static/videos/reconstruction/00149_Outer_1_compressed.mp4" data-poster="./static/videos/reconstruction/00149_Outer_1_compressed.webp"></video></div></figure>
+                    <figure class="slide"><div class="media" style="aspect-ratio: 1920 / 388"><video controls data-src="./static/videos/reconstruction/00151_Outer_compressed.mp4" data-poster="./static/videos/reconstruction/00151_Outer_compressed.webp"></video></div></figure>
+                    <figure class="slide"><div class="media" style="aspect-ratio: 1920 / 388"><video controls data-src="./static/videos/reconstruction/00163_Outer_compressed.mp4" data-poster="./static/videos/reconstruction/00163_Outer_compressed.webp"></video></div></figure>
+                    <figure class="slide"><div class="media" style="aspect-ratio: 1920 / 388"><video controls data-src="./static/videos/reconstruction/00168_Outer_2_compressed.mp4" data-poster="./static/videos/reconstruction/00168_Outer_2_compressed.webp"></video></div></figure>
+                    <figure class="slide"><div class="media" style="aspect-ratio: 1920 / 388"><video controls data-src="./static/videos/reconstruction/00179_Outer_compressed.mp4" data-poster="./static/videos/reconstruction/00179_Outer_compressed.webp"></video></div></figure>
+                </div>
+            </div>
+        </section>
+
+        <section id="main-idea" class="section">
+            <div class="narrow prose">
+                <h2>Main Idea</h2>
+            </div>
+            <div class="wide">
+                <h3 class="sub">Body-Anchored Gaussians for Physically Plausible Layering</h3>
+                <p>
+                    DAMA introduces a novel Gaussian parameterization that explicitly encodes physical structure.
+                    Each Gaussian is bound to a SMPL-X face using barycentric coordinates and a strictly positive
+                    normal offset, preventing lateral drift, preserving semantic identity under deformation, and
+                    enforcing outward layer ordering by design.
+                </p>
+                <div class="figure figure-tight figure-narrow">
+                    <img width="1400" height="864" decoding="async" loading="lazy" src="./static/images/representation.webp" alt="Body-anchored Gaussian representation">
+                </div>
+
+                <h3 class="sub">Disentangled Multi-Layered Avatar Reconstruction</h3>
+                <p>
+                    From multi-view images and segmentation masks, DAMA reconstructs
+                    body-anchored Gaussians bound to SMPL-X faces, refines garment layers via
+                    topology-aware label correction, and optimizes each layer independently to
+                    produce clean, intersection-free, and controllable multi-layered avatars.
+                </p>
+                <div class="figure figure-tight">
+                    <img width="2400" height="951" decoding="async" loading="lazy" src="./static/images/method.webp" alt="DAMA reconstruction method">
+                </div>
+
+                <h3 class="sub">Garment Transfer and Stacking</h3>
+                <p>
+                    DAMA enables garment transfer, stacking, and reordering across avatars.
+                    Anchored garment layers can be transferred and merged with existing layers.
+                    Explicit layer ordering resolves collisions and supports consistent SMPL-X-driven animation.
+                </p>
+                <div class="figure figure-tight">
+                    <img width="2400" height="347" decoding="async" loading="lazy" src="./static/images/transfer.webp" alt="Garment transfer and stacking">
+                </div>
+            </div>
+        </section>
+
+        <section id="method" class="section">
+            <div class="narrow prose">
+                <h2>Method Visualization</h2>
+            </div>
+            <div class="wide">
+                <h3 class="sub">Stage 1: Coarse Reconstruction from Segmentation</h3>
+                <p>
+                    Stage 1 lifts multi-view segmentation masks to coarse body-anchored Gaussians. Geometry and semantic
+                    labels are jointly optimized under segmentation supervision. The colors of SMPL-X Gaussians are
+                    randomized to stabilize alpha compositing and avoid overfitting to underlying body colors.
+                </p>
+                <div class="media video-block" style="aspect-ratio: 1920 / 888"><video controls data-src="./static/videos/method/stage_1_compressed.mp4" data-poster="./static/videos/method/stage_1_compressed.webp"></video></div>
+
+                <h3 class="sub">Stage 3: Fine Geometry and Appearance Optimization</h3>
+                <p>
+                    Stage 3 refines each semantic layer with masked RGB supervision. Layers are optimized sequentially and
+                    independently for geometry and appearance. The colors of SMPL-X Gaussians are randomized to stabilize
+                    alpha compositing and avoid overfitting to underlying body colors.
+                </p>
+                <div class="media video-block" style="aspect-ratio: 1920 / 836"><video controls data-src="./static/videos/method/stage_3_compressed.mp4" data-poster="./static/videos/method/stage_3_compressed.webp"></video></div>
+            </div>
+        </section>
+
+        <section id="comparisons" class="section">
+            <div class="narrow prose">
+                <h2>Comparisons</h2>
+            </div>
+            <div class="wide">
+                <h3 class="sub">Full-Avatar Reconstruction</h3>
+                <p>
+                    DAMA reconstructs non-intersecting layered garments with accurate labels.
+                </p>
+                <figure class="figure figure-tight">
+                    <img width="2400" height="701" decoding="async" loading="lazy" src="./static/images/reconstruction.webp" alt="Full-avatar reconstruction comparison">
+                    <figcaption>Notice the cleaner garment boundaries and reduced garment-body intersections.</figcaption>
+                </figure>
+
+                <h3 class="sub">Garment Disentanglement</h3>
+                <p>
+                    DAMA yields cleanly isolated garments through topology-aware refinement.
+                </p>
+                <figure class="figure figure-tight">
+                    <img width="2400" height="560" decoding="async" loading="lazy" src="./static/images/disentanglement.webp" alt="Garment disentanglement comparison">
+                    <figcaption>Notice the absence of floating artifacts in DAMA and the cleaner separation
+                        between upper and outer garments.</figcaption>
+                </figure>
+
+                <h3 class="sub">Comparison with Disco4D (360°)</h3>
+                <div class="carousel" data-carousel>
+                    <figure class="slide"><div class="media" style="aspect-ratio: 1920 / 798"><video controls data-src="./static/videos/comparisons/disco4d/00122_Outer_compressed.mp4" data-poster="./static/videos/comparisons/disco4d/00122_Outer_compressed.webp"></video></div></figure>
+                    <figure class="slide"><div class="media" style="aspect-ratio: 1920 / 798"><video controls data-src="./static/videos/comparisons/disco4d/00135_Inner_compressed.mp4" data-poster="./static/videos/comparisons/disco4d/00135_Inner_compressed.webp"></video></div></figure>
+                    <figure class="slide"><div class="media" style="aspect-ratio: 1920 / 798"><video controls data-src="./static/videos/comparisons/disco4d/00136_Outer_1_compressed.mp4" data-poster="./static/videos/comparisons/disco4d/00136_Outer_1_compressed.webp"></video></div></figure>
+                    <figure class="slide"><div class="media" style="aspect-ratio: 1920 / 798"><video controls data-src="./static/videos/comparisons/disco4d/00140_Inner_2_compressed.mp4" data-poster="./static/videos/comparisons/disco4d/00140_Inner_2_compressed.webp"></video></div></figure>
+                    <figure class="slide"><div class="media" style="aspect-ratio: 1920 / 798"><video controls data-src="./static/videos/comparisons/disco4d/00152_Inner_compressed.mp4" data-poster="./static/videos/comparisons/disco4d/00152_Inner_compressed.webp"></video></div></figure>
+                    <figure class="slide"><div class="media" style="aspect-ratio: 1920 / 798"><video controls data-src="./static/videos/comparisons/disco4d/00163_Outer_compressed.mp4" data-poster="./static/videos/comparisons/disco4d/00163_Outer_compressed.webp"></video></div></figure>
+                    <figure class="slide"><div class="media" style="aspect-ratio: 1920 / 798"><video controls data-src="./static/videos/comparisons/disco4d/00174_Inner_compressed.mp4" data-poster="./static/videos/comparisons/disco4d/00174_Inner_compressed.webp"></video></div></figure>
+                </div>
+
+                <h3 class="sub">Comparison with GALA (360°)</h3>
+                <div class="carousel" data-carousel>
+                    <figure class="slide"><div class="media" style="aspect-ratio: 1920 / 798"><video controls data-src="./static/videos/comparisons/gala/00151_Outer_compressed.mp4" data-poster="./static/videos/comparisons/gala/00151_Outer_compressed.webp"></video></div></figure>
+                    <figure class="slide"><div class="media" style="aspect-ratio: 1920 / 798"><video controls data-src="./static/videos/comparisons/gala/00168_Outer_2_compressed.mp4" data-poster="./static/videos/comparisons/gala/00168_Outer_2_compressed.webp"></video></div></figure>
+                    <figure class="slide"><div class="media" style="aspect-ratio: 1920 / 798"><video controls data-src="./static/videos/comparisons/gala/00149_Outer_1_compressed.mp4" data-poster="./static/videos/comparisons/gala/00149_Outer_1_compressed.webp"></video></div></figure>
+                    <figure class="slide"><div class="media" style="aspect-ratio: 1920 / 798"><video controls data-src="./static/videos/comparisons/gala/00163_Outer_compressed.mp4" data-poster="./static/videos/comparisons/gala/00163_Outer_compressed.webp"></video></div></figure>
+                    <figure class="slide"><div class="media" style="aspect-ratio: 1920 / 798"><video controls data-src="./static/videos/comparisons/gala/00122_Outer_compressed.mp4" data-poster="./static/videos/comparisons/gala/00122_Outer_compressed.webp"></video></div></figure>
+                    <figure class="slide"><div class="media" style="aspect-ratio: 1920 / 798"><video controls data-src="./static/videos/comparisons/gala/00136_Outer_1_compressed.mp4" data-poster="./static/videos/comparisons/gala/00136_Outer_1_compressed.webp"></video></div></figure>
+                    <figure class="slide"><div class="media" style="aspect-ratio: 1920 / 798"><video controls data-src="./static/videos/comparisons/gala/00179_Outer_compressed.mp4" data-poster="./static/videos/comparisons/gala/00179_Outer_compressed.webp"></video></div></figure>
+                </div>
+            </div>
+        </section>
+
+        <section id="applications" class="section">
+            <div class="narrow prose">
+                <h2>Applications</h2>
+            </div>
+            <div class="wide">
+                <h3 class="sub">Retargeting and Layer Ordering</h3>
+                <p>
+                    DAMA enables outfit composition and transfer
+                    across avatars.
+                    Our representation explicitly encodes layer order, allowing garments to be reordered consistently across
+                    views and animation
+                    frames (e.g., a shirt tucked into or worn over pants). The resulting layered avatars can be animated
+                    with SMPL-X-driven motion.
+                </p>
+                <div class="media video-block" style="aspect-ratio: 1920 / 670"><video data-src="./static/videos/applications/retargeting_intro_compressed.mp4" data-poster="./static/videos/applications/retargeting_intro_compressed.webp"></video></div>
+                <div class="media video-block" style="aspect-ratio: 1920 / 780"><video controls data-src="./static/videos/applications/retargeting_compressed.mp4" data-poster="./static/videos/applications/retargeting_compressed.webp"></video></div>
+
+                <h3 class="sub">Garment Stacking</h3>
+                <p>
+                    DAMA enables collision-free garment stacking through explicit layer ordering.
+                </p>
+                <div class="media video-block" style="aspect-ratio: 1920 / 408"><video controls data-src="./static/videos/applications/stacking_compressed.mp4" data-poster="./static/videos/applications/stacking_compressed.webp"></video></div>
+
+                <h3 class="sub">SMPL-X-driven Animation</h3>
+                <p>
+                    DAMA supports animation by deforming all layers with SMPL-X articulation.
+                    The anchored representation preserves stable, intersection-free layering under motion.
+                </p>
+                <div class="media video-block" style="aspect-ratio: 1920 / 802"><video controls data-src="./static/videos/applications/animation_compressed.mp4" data-poster="./static/videos/applications/animation_compressed.webp"></video></div>
+
+                <h3 class="sub">Conversion to Meshes and Simulation</h3>
+                <p>
+                    DAMA's physically plausible representation supports conversion of layered Gaussian
+                    avatars into simulation-ready meshes.
+                </p>
+
+                <h4 class="sub">Individual Garment Simulation</h4>
+                <p>
+                    Individual garments can be converted to meshes and simulated independently.
+                </p>
+                <div class="media video-block" style="aspect-ratio: 1920 / 640"><video controls data-src="./static/videos/applications/individual_garment_compressed.mp4" data-poster="./static/videos/applications/individual_garment_compressed.webp"></video></div>
+
+                <h4 class="sub">Full Outfit Simulation</h4>
+                <p>
+                    Full reconstructed outfits can be converted and simulated consistently.
+                </p>
+                <div class="media video-block" style="aspect-ratio: 1920 / 650"><video controls data-src="./static/videos/applications/full_outfit_compressed.mp4" data-poster="./static/videos/applications/full_outfit_compressed.webp"></video></div>
+
+                <h4 class="sub">Stacked Garments Simulation</h4>
+                <p>
+                    Transferred and stacked garments can also be simulated jointly.
+                </p>
+                <div class="media video-block" style="aspect-ratio: 1920 / 708"><video controls data-src="./static/videos/applications/stacked_garments_compressed.mp4" data-poster="./static/videos/applications/stacked_garments_compressed.webp"></video></div>
+            </div>
+        </section>
+
+        <section id="acknowledgements" class="section">
+            <div class="narrow prose">
+                <h2>Acknowledgements</h2>
+                <p>
+                    This work is made possible by funding from the Carl Zeiss Foundation.
+                    This work is also funded by the Deutsche Forschungsgemeinschaft
+                    (DFG, German Research Foundation) – 409792180 (Emmy Noether Programme,
+                    project: Real Virtual Humans) and the German Federal Ministry of
+                    Education and Research (BMBF): Tübingen AI Center, FKZ: 01IS18039A.
+                    Daniel Eskandar is supported by the Konrad Zuse School of Excellence
+                    in Learning and Intelligent Systems (ELIZA) through the DAAD programme
+                    Konrad Zuse School of Excellence in Artificial Intelligence, sponsored
+                    by the Federal Ministry of Education and Research. Berna Kabadayi is
+                    supported by the International Max Planck Research School for Intelligent
+                    Systems (IMPRS-IS). Gerard Pons-Moll is a member of the Machine Learning
+                    Cluster of Excellence, EXC number 2064/1 – Project number 390727645.
+                </p>
+            </div>
+            <div class="wide logos">
+                <div class="logo-row">
+                    <img src="static/images/Tuebingen_logo_scaled.png" alt="University of Tübingen" loading="lazy" style="height: 46px;">
+                    <img src="static/images/ai_center_3.png" alt="Tübingen AI Center" loading="lazy" style="height: 50px;">
+                    <img src="static/images/MPI-IS.png" alt="MPI-IS" loading="lazy" style="height: 46px;">
+                    <img src="static/images/IMPRS-IS.png" alt="IMPRS-IS" loading="lazy" style="height: 40px;">
+                </div>
+                <div class="logo-row">
+                    <img src="static/images/mpi-logo-new.svg" alt="MPI-INF" loading="lazy" style="height: 46px;">
+                    <img src="static/images/zuse_school_eliza_logo_rgb.png" alt="Zuse School ELIZA" loading="lazy" style="height: 60px;">
+                    <img src="static/images/Carl-Zeiss-Stiftung_Logo.png" alt="Carl-Zeiss-Stiftung" loading="lazy" style="height: 60px;">
+                </div>
+            </div>
+        </section>
+
+        <section id="bibtex" class="section">
+            <div class="narrow prose">
+                <h2>BibTeX</h2>
+                <div class="code-block">
+                    <button class="button small copy" id="copy-bibtex">
+                        <svg class="icon" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V5a1 1 0 0 1 1-1h9" /></svg>
+                        <span>Copy</span>
+                    </button>
+                    <pre><code id="bibtex-code"><span class="bib-type">@InProceedings</span>{<span class="bib-key">eskandar2026dama</span>,
+    <span class="bib-field">author</span>    = {Eskandar, Daniel and Kabadayi, Berna and Tiwari, Garvita and Pons-Moll, Gerard},
+    <span class="bib-field">title</span>     = {DAMA: Disentangled Body-Anchored Gaussians for Controllable Multi-Layered Avatars},
+    <span class="bib-field">booktitle</span> = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition Workshops (CVPRW)},
+    <span class="bib-field">month</span>     = {June},
+    <span class="bib-field">year</span>      = {2026},
+    <span class="bib-field">pages</span>     = {5799--5811}
+}</code></pre>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-links">
+            <a href="https://arxiv.org/pdf/2605.21001" target="_blank" rel="noopener" aria-label="Paper">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M14 3H6v18h12V7l-4-4Zm0 0v4h4M9 13h6M9 17h6" /></svg>
+            </a>
+            <a href="https://github.com/danieleskandar/dama" target="_blank" rel="noopener" aria-label="Code">
+                <svg class="icon icon-fill" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+            </a>
+        </div>
+        <p>This webpage was built using the template from
+            <a href="https://github.com/nerfies/nerfies.github.io" target="_blank" rel="noopener">Nerfies</a>.</p>
+    </footer>
+</body>
+
+</html>
